@@ -65,8 +65,8 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'comparison.pipelines.ComparisonPipeline': 300,
-    'comparison.pipelines.JsonWriterPipeline': 800,
+    'comparison.pipelines.ComparisonPipeline.ComparisonPipeline': 300,
+    'comparison.pipelines.JsonWriterPipeline.JsonWriterPipeline': 800,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
