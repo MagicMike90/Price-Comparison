@@ -29,7 +29,7 @@ class JbhifiSpider(CrawlSpider):
         #
         # There will be a duplicated links
         # next_selector = response.xpath('//*[contains(@class,"main")]/li/a//@href')
-        next_selector = response.xpath('//*[contains(@class,"main")]/li/a//@href')
+        next_selector = response.xpath('//*[contains(@class,"pagNum")]//a/@href')
         for url in next_selector.extract():
             logger.info(url)
             yield Request(urlparse.urljoin(response.url, url))
