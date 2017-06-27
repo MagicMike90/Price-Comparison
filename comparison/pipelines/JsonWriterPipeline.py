@@ -1,4 +1,6 @@
 import json
+import logging
+logger = logging.getLogger('ComparisonPipeline')
 
 class JsonWriterPipeline(object):
 
