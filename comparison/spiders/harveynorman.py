@@ -5,7 +5,7 @@ import socket
 import logging
 
 
-from comparison.hn_items import HNItem
+from comparison.items import ComparisonItem
 
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
@@ -15,7 +15,7 @@ from scrapy.http import Request
 from scrapy.linkextractors import LinkExtractor
 
 
-logger = logging.getLogger('harveynorman')
+logger = logging.getLogger('HarveynormanSpider')
 
 class HarveynormanSpider(CrawlSpider):
     name = "harveynorman"

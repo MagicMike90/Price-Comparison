@@ -7,6 +7,7 @@
 
 import logging
 logger = logging.getLogger('ComparisonPipeline')
+
 class ComparisonPipeline(object):
     def process_item(self, item, spider):
         logger.info(item)
