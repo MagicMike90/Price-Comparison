@@ -14,6 +14,7 @@ from scrapy.http import Request
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 
+
 logger = logging.getLogger('JbhifiSpider')
 
 class JbhifiSpider(CrawlSpider):
@@ -29,16 +30,19 @@ class JbhifiSpider(CrawlSpider):
         #
         # There will be a duplicated links
         # next_selector = response.xpath('//*[contains(@class,"main")]/li/a//@href')
+
+        # category_selector = response.xpath('//*[contains(@class,"main")]//a/@href');
+        # for url in category_selector.extract():
+        #     logger.info(url)
+        #     yield Request(urlparse.urljoin(response.url, url))
+
         next_selector = response.xpath('//*[contains(@class,"pagNum")]//a/@href')
         for url in next_selector.extract():
-            logger.info(url)
             yield Request(urlparse.urljoin(response.url, url))
 
         # Get item URLs and yield Requests
-        item_selector = response.xpath('//*[contains(@class,"photo-box")]/a/@href')
- 
+        item_selector = response.xpath('//*[@id="productsContainer"]//a/@href')
         for url in item_selector.extract():
-            logger.info(url)
             yield Request(urlparse.urljoin(response.url, url),
                           callback=self.parse_item)
 
@@ -51,18 +55,14 @@ class JbhifiSpider(CrawlSpider):
     def parse_item(self, response):
         logger.info(response.url)
         # Create the loader using the response
-        l = ItemLoader(item=HNItem(), response=response)
+        l = ItemLoader(item=ComparisonItem(), response=response)
 
         # # Load fields using XPath expressions
-        l.add_xpath('title', '//*[@class="name"][1]/text()',
-                    MapCompose(unicode.strip, unicode.title))
-        l.add_xpath('title', '//*[@class="product-name"][1]/text()',
-                    MapCompose(unicode.strip, unicode.title))
-        l.add_xpath('price', './/*[@class="amount"][1]/text()',
-                    MapCompose(lambda i: i.replace(',', ''), float),
+        l.add_xpath('title', '//*[contains(@class,"primary")]//h1/text()')
+        l.add_xpath('price', '//*[contains(@class,"overview")]//*[contains(@class,"amount")]/text()',
                     re='[,.0-9]+')
-        l.add_xpath('description', '//*[@class="short-description"][1]/text()',
-                    MapCompose(unicode.strip), Join())
+        # l.add_xpath('description', '//*[@class="short-description"][1]/text()',
+        #             MapCompose(unicode.strip), Join())
         # l.add_xpath('address',
         #             '//*[@itemtype="http://schema.org/Place"][1]/text()',
         #             MapCompose(unicode.strip))
