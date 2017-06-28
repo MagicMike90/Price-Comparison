@@ -11,17 +11,23 @@ from scrapy.loader.processors import Join, MapCompose, TakeFirst
 
 from w3lib.html import remove_tags
 
-
+def filter_price(value):
+    if value.isdigit():
+        return value
+        
 class ComparisonItem(scrapy.Item):
     default_output_processor = TakeFirst()
 
     # Primary fields
-    title = Field(input_processor = MapCompose(unicode.strip, unicode.title,remove_tags))
-    price = Field(input_processor = MapCompose(lambda i: i.replace(',', '')))
     # title = Field()
     # price = Field()
-    description = Field()
-    address = Field()
+    # description = Field()
+    #     address = Field()
+    # image_urls = Field()
+    title = Field(input_processor=MapCompose(unicode.strip, unicode.title, remove_tags))
+    price = Field(input_processor=MapCompose(lambda i: i.replace(',', '')))
+    # description = Field()
+    # address = Field()
     image_urls = Field()
 
     # Calculated fields

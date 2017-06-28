@@ -24,33 +24,40 @@ class JbhifiSpider(CrawlSpider):
         # 'https://www.jbhifi.com.au/',
         'https://www.jbhifi.com.au/computers-tablets/tablets/']
 
-    def parse(self, response):
-        logger.info(response.url)
-        # Get the next index URLs and yield Requests
-        #
-        # There will be a duplicated links
-        # next_selector = response.xpath('//*[contains(@class,"main")]/li/a//@href')
+    # Rules for horizontal and vertical crawling
+    rules = (
+        Rule(LinkExtractor(restrict_xpaths='//*[contains(@class,"pagNum")]//a')),
+        Rule(LinkExtractor(restrict_xpaths='//*[@id="productsContainer"]//a'),
+             callback='parse_item')
+    )
 
-        # category_selector = response.xpath('//*[contains(@class,"main")]//a/@href');
-        # for url in category_selector.extract():
-        #     logger.info(url)
-        #     yield Request(urlparse.urljoin(response.url, url))
+    # def parse(self, response):
+    #     logger.info(response.url)
+    #     # Get the next index URLs and yield Requests
+    #     #
+    #     # There will be a duplicated links
+    #     # next_selector = response.xpath('//*[contains(@class,"main")]/li/a//@href')
 
-        next_selector = response.xpath('//*[contains(@class,"pagNum")]//a/@href')
-        for url in next_selector.extract():
-            yield Request(urlparse.urljoin(response.url, url))
+    #     # category_selector = response.xpath('//*[contains(@class,"main")]//a/@href');
+    #     # for url in category_selector.extract():
+    #     #     logger.info(url)
+    #     #     yield Request(urlparse.urljoin(response.url, url))
 
-        # Get item URLs and yield Requests
-        item_selector = response.xpath('//*[@id="productsContainer"]//a/@href')
-        for url in item_selector.extract():
-            yield Request(urlparse.urljoin(response.url, url),
-                          callback=self.parse_item)
+    #     # next_selector = response.xpath('//*[contains(@class,"pagNum")]//a/@href')
+    #     # for url in next_selector.extract():
+    #     #     yield Request(urlparse.urljoin(response.url, url))
 
-        # page = response.url.split("/")[-2]
-        # filename = 'price-%s.html' % page
-        # with open(filename, 'wb') as f:
-        #     f.write(response.body)
-        # self.log('Saved file %s' % filename)
+    #     # # Get item URLs and yield Requests
+    #     # item_selector = response.xpath('//*[@id="productsContainer"]//a/@href')
+    #     # for url in item_selector.extract():
+    #     #     yield Request(urlparse.urljoin(response.url, url),
+    #     #                   callback=self.parse_item)
+
+    #     # page = response.url.split("/")[-2]
+    #     # filename = 'price-%s.html' % page
+    #     # with open(filename, 'wb') as f:
+    #     #     f.write(response.body)
+    #     # self.log('Saved file %s' % filename)
 
     def parse_item(self, response):
         logger.info(response.url)
@@ -61,13 +68,21 @@ class JbhifiSpider(CrawlSpider):
         l.add_xpath('title', '//*[contains(@class,"primary")]//h1/text()')
         l.add_xpath('price', '//*[contains(@class,"overview")]//*[contains(@class,"amount")]/text()',
                     re='[,.0-9]+')
-        # l.add_xpath('description', '//*[@class="short-description"][1]/text()',
+        # l.add_xpath('description', '//div[@id="tab1"]//*[contains(@class,"cms-content")]',
         #             MapCompose(unicode.strip), Join())
         # l.add_xpath('address',
         #             '//*[@itemtype="http://schema.org/Place"][1]/text()',
         #             MapCompose(unicode.strip))
-        # l.add_xpath('image_urls', '//*[@itemprop="image"][1]/@src',
-        #             MapCompose(lambda i: urlparse.urljoin(response.url, i)))
+        l.add_xpath('image_urls', '//*[@class="gallery"]//img[1]/@src',
+                    MapCompose(lambda i: urlparse.urljoin(response.url, i)))
+
+
+        # Housekeeping fields
+        l.add_value('url', response.url)
+        l.add_value('project', self.settings.get('BOT_NAME'))
+        l.add_value('spider', self.name)
+        l.add_value('server', socket.gethostname())
+        # l.add_value('date', datetime.datetime.now())
         return l.load_item()
 
         # i = {}
