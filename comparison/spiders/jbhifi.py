@@ -7,7 +7,7 @@ import logging
 
 from comparison.items import ComparisonItem
 
-from scrapy.loader.processors import MapCompose, Join
+from scrapy.loader.processors import MapCompose, Join, TakeFirst
 from scrapy.loader import ItemLoader
 
 from scrapy.http import Request
@@ -62,19 +62,21 @@ class JbhifiSpider(CrawlSpider):
     def parse_item(self, response):
         logger.info(response.url)
         # Create the loader using the response
-        l = ItemLoader(item=ComparisonItem(), response=response)
+        loader = ItemLoader(item=ComparisonItem(), response=response)
+        l = loader.nested_xpath('//*[@class="product-page"]')
 
         # # Load fields using XPath expressions
         l.add_xpath('title', '//*[contains(@class,"primary")]//h1/text()')
-        l.add_xpath('price', '//*[contains(@class,"overview")]//*[contains(@class,"amount")]/text()',
+        l.add_xpath('price', '//*[contains(@class,"overview")]'
+                    '//*[contains(@class,"amount")]/text()',
                     re='[,.0-9]+')
         # l.add_xpath('description', '//div[@id="tab1"]//*[contains(@class,"cms-content")]',
         #             MapCompose(unicode.strip), Join())
         # l.add_xpath('address',
         #             '//*[@itemtype="http://schema.org/Place"][1]/text()',
         #             MapCompose(unicode.strip))
-        l.add_xpath('image_urls', '//*[@class="gallery"]//img[1]/@src',
-                    MapCompose(lambda i: urlparse.urljoin(response.url, i)))
+        l.add_xpath('image_urls', '//*[@class="gallery"]//img[1]/@data-src',
+                    MapCompose(lambda i: urlparse.urljoin(response.url, i)), TakeFirst())
 
 
         # Housekeeping fields
